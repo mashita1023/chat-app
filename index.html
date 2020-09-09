@@ -6,6 +6,14 @@
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   </head>
   <body>
+    <script>
+      let name = prompt('名前を入力してください');
+/*      let data = [{
+        "name" : "",
+        "message" : "",
+      }]
+      data.name = name;*/
+    </script>
     <h1>Socket IO を使ってみよう</h1>
     <ul id="messages"></ul>
     <form id="message_form" action="#">
@@ -16,13 +24,16 @@
       let socketio = io();
       $(function(){
         $('#message_form').submit(function(){
-          socketio.emit('message', $('#input_msg').val());
+//          data.message = $('#input_msg').val();
+          let data = JSON.stringify({ name:name, message:$('#input_msg').val() });
+          socketio.emit('message', data);
           $('#input_msg').val('');
           return false;
         });
         socketio.on('message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-	});
+          let data = JSON.parse(msg);
+          $('#messages').append($('<p>').text( data.name + ' : ' +data.message));
+	      });
       });
     </script>
   </body>
