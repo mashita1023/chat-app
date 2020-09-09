@@ -8,7 +8,7 @@ jsでチャットアプリをテスト用に作ってみました
 # 使い方
 ```
 $ npm install
-$ node app
+$ node public/server
 ```
 
 でサーバー起動
