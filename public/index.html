@@ -14,6 +14,9 @@
         let name = prompt('名前を入力してください');
         let socketio = io();
 
+        let data = JSON.stringify({ name:name, message:'is connect.', action:'chat'})
+        socketio.emit('message', data);
+
         $('#message_form').submit(function(){
           let data = JSON.stringify({ name:name, message:$('#input_msg').val(), action:'chat' });
           socketio.emit('message', data);
@@ -40,9 +43,11 @@
           user_ball.innerHTML = name;
           user_ball.style.textAlign = "center";
           user_ball.style.lineHeight = ("80px");
-          user_ball.id = 'mine'
+          user_ball.id = 'mine';
 
           $('#box').append(user_ball);
+//          let
+//          socketio.emit('enterRoom')
         }
 // 動かすところ
         let flag = false;
@@ -80,19 +85,23 @@
 
 // 受信
         socketio.on('message', function(msg){
-            let data = JSON.parse(msg);
-            switch(data.action) {
-            case 'mousemove':
-              $('#box-x').text('X: ' + data.x);
-              $('#box-y').text('Y: ' + data.y);
-              $('#mine').css('left', data.x);
-              $('#mine').css('top', data.y);
-              break;
-            case 'chat':
-              $('#messages').append($('<p>').text( data.name + ' : ' + data.message));
-              break;
-            }
+          let data = JSON.parse(msg);
+          switch(data.action) {
+          case 'mousemove':
+            $('#box-x').text('X: ' + data.x);
+            $('#box-y').text('Y: ' + data.y);
+            $('#mine').css('left', data.x);
+            $('#mine').css('top', data.y);
+            break;
+          case 'chat':
+            $('#messages').append($('<p>').text( data.name + ' : ' + data.message));
+            break;
+          }
         });
+
+        socketio.on('logout', function(data) {
+          $('#messages').append($('<p>').text(data));
+        })
       });
     </script>
     <h1>Socket IO を使ってみよう</h1>
