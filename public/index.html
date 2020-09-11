@@ -5,6 +5,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/1.8.0/fingerprint2.min.js"></script>
   </head>
   <body>
     <script>
@@ -39,12 +40,21 @@
           user_ball.innerHTML = name;
           user_ball.style.textAlign = "center";
           user_ball.style.lineHeight = ("80px");
+          user_ball.id = 'mine'
 
           $('#box').append(user_ball);
         }
 // 動かすところ
         let flag = false;
 
+        $('#mine').draggable();
+        $('#mine').mousedown(function () {
+          flag = true;
+        });
+        $('#mine').mouseup(function (){
+          flag = false;
+        });
+/*
         $('#target').draggable();
         $('#target').mousedown(function () {
           flag = true;
@@ -52,15 +62,18 @@
         $('#target').mouseup(function() {
           flag=false;
         });
+*/
         $('#box').mousemove(function(event) {
           let x = event.pageX - $('#box').position().left;
           let y = event.pageY - $('#box').position().top;
 
           if(flag) {
-            $('#target').css('left',x);
+/*            $('#target').css('left',x);
             $('#target').css('top', y);
-
-            let data = JSON.stringify({ x:x, y:y, action:'mousemove'})
+*/
+            $('#mine').css('left', x);
+            $('#mine').css('top', y);
+            let data = JSON.stringify({ name:name, x:x, y:y, action:'mousemove'})
             socketio.emit('message', data);
           }
         });
@@ -72,11 +85,11 @@
             case 'mousemove':
               $('#box-x').text('X: ' + data.x);
               $('#box-y').text('Y: ' + data.y);
-              $('#target').css('left', obj.x);
-              $('#target').css('top', obj.y);
+              $('#mine').css('left', data.x);
+              $('#mine').css('top', data.y);
               break;
             case 'chat':
-              $('#messages').append($('<p>').text( data.name + ' : ' +data.message));
+              $('#messages').append($('<p>').text( data.name + ' : ' + data.message));
               break;
             }
         });
