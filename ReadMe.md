@@ -7,7 +7,8 @@ jsでチャットアプリをテスト用に作ってみました
 
 # 使い方
 ```
-$ npm install
+$ npm install socket.io
+$ npm install express
 $ node app
 ```
 
