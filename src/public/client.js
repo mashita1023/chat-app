@@ -105,7 +105,7 @@ $( () => {
       $('#messages').append($('<p>').text(msg));
   })
 
-  socketio.on('logout', (data) => {
+  socketio.on('absense', (data) => {
     $('#messages').append($('<p>').text(data));
   })
 });
