@@ -13,18 +13,28 @@ app.get('/', function(req, res){
 // フォルダの指定
 app.use( express.static(__dirname + '/public'));
 
-//常時
+//通信処理
 io.on('connection', (socket) => {
 
-  socket.on('message', function(msg){
+  // 接続時
+  console.log('接続: ' + socket.id)
+  socket.on('join', (name) => {
+    console.log(name + ' join.');
+    msg = name + 'が入室しました。'
+    io.emit('join', msg);
+  })
+
+  // messageでemitを受けた時
+  socket.on('message', (msg) => {
     console.log('message:' + msg);
     io.emit('message', msg);
-    users[socket.id] = msg.name;
+//    users[socket.id] = msg.name;
     console.log(users);
   });
 
   // メッセージの送信者どうやって特定するん？
   // 名前とidの辞書生成すればいいかな？いいよね？
+  // 切断時
   socket.on('disconnect', (msg) => {
     console.log(msg)
     console.log(socket.id)
@@ -37,6 +47,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// サーバーの起動
 http.listen(PORT, () => {
   console.log('server listening. Port:' + PORT);
 });

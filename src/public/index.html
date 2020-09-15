@@ -6,23 +6,38 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/1.8.0/fingerprint2.min.js"></script>
+    <style type="text/css">
+      #chat-screen{
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <h1>Socket IO を使ってみよう</h1>
-    <!--move object-->
-    <div id="box" style="width:540px; height:250px; background-color:blue">
-<!--
-      <div id="target" style="width:40px; height:20px; background-color:green;"></div>
--->
+    <div id="join-screen">
+      <form id="join_form" action="">
+        名前を入力してください<br>
+        <input type="text" id="join_name" autocomplete="off"/>
+        <button>Send</button>
+      </form>
     </div>
-    <span id="box-x" style="display:block;"></span>
-    <span id="box-y" style="display:block;"></span>
-    <!--chat-->
-    <form id="message_form" action="#">
-      <input id="input_msg" autocomplete="off" />
-      <button>Send</button>
-    </form>
-    <ul id="messages"></ul>
+    <div id="chat-screen">
+      <!--move object-->
+      <div id="box" style="width:540px; height:250px; background-color:blue">
+  <!--
+        <div id="target" style="width:40px; height:20px; background-color:green;"></div>
+  -->
+      </div>
+      <span id="box-x" style="display:block;"></span>
+      <span id="box-y" style="display:block;"></span>
+      <!--chat-->
+      <form id="message_form" action="#">
+        <input id="input_msg" autocomplete="off" />
+        <button>Send</button>
+      </form>
+      <ul id="nickname"></ul><br> 
+      <ul id="messages"></ul>
+    </div>
     <script src='client.js'></script>
   </body>
 </html>
