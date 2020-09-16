@@ -1,111 +1,148 @@
-$( () => {
+class GameEvent {
+    constructor(data) {
+        this.data = data;
+    }
+}
 
-//  let name = prompt('名前を入力してください');
-  let socketio = io();
-  let name = '';
+class User {
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+        this.listeners = {};
+    }
+// 追加するイベント
+    addEventListener(type, listener) {
+        if (!this.listeners[type]) {
+            this.listeners[type] = [];
+        }
+        this.listeners[type].push(listener);
+    }
+// 消すイベント
+    dispatchEvent(type, event) {
+        const listeners = this.listeners[type] || [];
+        listeners.forEach(listener => listener(event));
+    }
+// destroy条件
+    destroyIfContains(x, y) {
+        if (x > this.x && x < this.x + 32 && y > this.y && y < this.y + 32) {
+            this.dispatchEvent("destroy", newGameEvent(this));
+            console.log("destroy")
+        }
+    }
 
-  // 名前入力
-  $('#join_form').submit( () => {
-    name = $('#join_name').val();
+    update(input) {}
+
+    render(context) {
+        context.fillStyle = "rgb(255, 127, 127)";
+        context.fillRect(this.x, this.y, 32, 32);
+    }
+}
+
+let socketio = io();
+let name = '';
+let canvas = document.getElementById("canvas");
+let context = canvas.getContext('2d');
+let users = [];
+
+
+
+// 名前入力
+$('#joinForm').submit( () => {
+    name = $('#joinName').val();
     socketio.emit('join', name);
 
     $('#nickname').append($('<p>').text('あなたの名前：' + name));
-    $('#join-screen').hide();
-    $('#chat-screen').show();
-    create_circle();
+    $('#joinScreen').hide();
+    $('#chatScreen').show();
     return false;
-  });
+});
 
-  // chat部分
-  $('#message_form').submit( () => {
+// chat部分
+$('#message_form').submit( () => {
     let data = JSON.stringify({ name:name, message:$('#input_msg').val(), action:'chat' });
     socketio.emit('message', data);
     $('#input_msg').val('');
     return false;
-  });
+});
 
-// オブジェクト生成
-  const create_circle = () => {
-    if (name) {
-        let user_ball = document.createElement('div');
-        user_ball.style.position = "absolute";
-
-        let randLeft = 10 + Math.random()*260;
-        let randTop = 10 + Math.random()*260;
-
-        user_ball.style.left = randLeft;
-        user_ball.style.top = randTop;
-
-        user_ball.style.width = "80px";
-        user_ball.style.height = "80px";
-        user_ball.style.borderRadius = "50%";
-        user_ball.style.background = "white";
-        user_ball.style.border = "solid 3px skyblue";
-        user_ball.innerHTML = name;
-        user_ball.style.textAlign = "center";
-        user_ball.style.lineHeight = ("80px");
-        user_ball.id = 'mine';
-
-        $('#box').append(user_ball);
-    //          let
-    //          socketio.emit('enterRoom')
-    }
-
-    // 動かすところ
-    let flag = false;
-
-    $('#mine').draggable();
-    $('#mine').mousedown( () => {
-        flag = true;
-    });
-    $('#mine').mouseup( () => {
-        flag = false;
-    });
-    /*
-    $('#target').draggable();
-    $('#target').mousedown(function () {
-        flag = true;
-    });
-    $('#target').mouseup(function() {
-        flag=false;
-    });
-    */
-    $('#box').mousemove( (event) => {
-        let x = event.pageX - $('#box').position().left;
-        let y = event.pageY - $('#box').position().top;
-
-        if(flag) {
-    /*            $('#target').css('left',x);
-        $('#target').css('top', y);
-    */
-        $('#mine').css('left', x);
-        $('#mine').css('top', y);
-        let data = JSON.stringify({ name:name, x:x, y:y, action:'mousemove'})
-        socketio.emit('message', data);
-        }
-    });
-  }
 // 受信
-  socketio.on('message', (msg) => {
+socketio.on('message', (msg) => {
     let data = JSON.parse(msg);
     switch(data.action) {
     case 'mousemove':
-      $('#box-x').text('X: ' + data.x);
-      $('#box-y').text('Y: ' + data.y);
-      $('#mine').css('left', data.x);
-      $('#mine').css('top', data.y);
-      break;
+        $('#box-x').text('X: ' + data.x);
+        $('#box-y').text('Y: ' + data.y);
+        $('#mine').css('left', data.x);
+        $('#mine').css('top', data.y);
+        break;
     case 'chat':
-      $('#messages').append($('<p>').text( data.name + ' : ' + data.message));
-      break;
+        $('#messages').append($('<p>').text( data.name + ' : ' + data.message));
+        break;
     }
-  });
-
-  socketio.on('join', (msg) => {
-      $('#messages').append($('<p>').text(msg));
-  })
-
-  socketio.on('absense', (data) => {
-    $('#messages').append($('<p>').text(data));
-  })
 });
+
+socketio.on('join', (some) => {
+    let data = JSON.parse(some);
+    $('#messages').append($('<p>').text(data.msg));
+    document.getElementById('mine').innerHTML = name;
+    //create_circle(data.uid);
+//    create_circle();
+})
+
+socketio.on('absense', (data) => {
+    $('#messages').append($('<p>').text(data));
+})
+
+canvas.addEventListener("click", e => {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left - 1;
+    const y = e.clientY - rect.top - 1;
+    users.forEach(user => user.destroyIFContains(x, y));
+})
+
+const FPS = 60;
+const frameTime = 1 / FPS;
+let prevTimestamp = 0;
+let tick = 0;
+
+const update = timestamp => {
+    const elapsed = (timestamp - prevTimestamp) / 1000;
+    if (elapsed <= timestamp) {
+        requestAnimationFrame(update);
+        return;
+    }
+
+    prevTimestamp = timestamp;
+    tick++;
+// 1秒に1回増やす
+    if (tick % FPS === 0) {
+        const x = Math.floor(Math.random() * (320 - 32));
+        const y = Math.floor(Math.random() * (320 - 32));
+        const user = new User(x, y);
+
+        user.addEventListener("destroy", e => {
+            users = users.filter(user => user !== e.data);
+        });
+        users.push(user);
+    }
+    users.forEach(user => user.update());
+
+    context.clearRect(0, 0, 320, 320);
+    users.forEach(user => user.render(context));
+
+    requestAnimationFrame(update);
+};
+
+update();
+
+/*********
+ * https://qiita.com/negi/items/6ec0d3cedba499eac81a
+動的に追加した要素はイベントが聞かない
+最初から一つ目は用意しておく
+
+上よりもWebGL使ったほうがよさそう
+
+PixiJSかthree.jsどっちか
+2DだからPixiJSでよさそう！！
+
+*********/

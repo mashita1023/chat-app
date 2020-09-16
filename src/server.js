@@ -23,7 +23,9 @@ io.on('connection', (socket) => {
     nickname = name_;
     console.log(nickname + ' join.');
     msg = nickname + 'が入室しました。'
-    io.emit('join', msg);
+    data = JSON.stringify({ uid:socket.id, msg:msg});
+    console.log(data)
+    io.emit('join', data);
   })
 
   // messageでemitを受けた時
