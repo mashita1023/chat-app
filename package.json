@@ -9,7 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "data-uri-to-buffer": "^3.0.1",
     "express": "^4.17.1",
+    "fabric": "^4.1.0",
+    "node-gyp": "^7.1.0",
     "socket.io": "^2.3.0"
   }
 }
